@@ -936,3 +936,15 @@ def eliminar_usuario_panolero(request, pk):
         messages.success(request, "Usuario eliminado exitosamente.")
         return redirect('listar_usuarios_panolero')
     return render(request, 'dashboards/panol/eliminar_usuarios.html', {'usuario': usuario})
+
+
+@login_required
+def detalle_solicitud_admin(request, solicitud_id):
+    solicitud = Solicitud.objects.get(id=solicitud_id)
+    detalles = solicitud.detalles.all()
+    
+    context = {
+        'solicitud': solicitud,
+        'detalles': detalles
+    }
+    return render(request, 'dashboards/admin/detalle_solicitud.html', context)
