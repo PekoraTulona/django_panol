@@ -471,10 +471,16 @@ def procesar_solicitud(request, solicitud_id):
                 solicitud.estado = 'rechazada'
                 solicitud.observaciones = observaciones
                 # Devolver herramientas al stock
+                # Devolver herramientas y activos fijos al stock
                 for detalle in solicitud.detalles.all():
-                    herramienta = detalle.herramienta
-                    herramienta.devolver_al_stock(detalle.cantidad)
-                messages.warning(request, f'La solicitud #{solicitud.id} ha sido rechazada y las herramientas devueltas al stock.')
+                    if detalle.herramienta:
+                        herramienta = detalle.herramienta
+                        herramienta.devolver_al_stock(detalle.cantidad)
+                    if detalle.activo_fijo:
+                        activo_fijo = detalle.activo_fijo
+                        activo_fijo.devolver_al_stock(detalle.cantidad)  # Asegúrate de que este método exista en el modelo ActivoFijo
+
+            messages.warning(request, f'La solicitud #{solicitud.id} ha sido rechazada y las herramientas y activos fijos devueltos al stock.')
             
             elif accion == 'en_proceso':
                 solicitud.estado = 'en_proceso'
