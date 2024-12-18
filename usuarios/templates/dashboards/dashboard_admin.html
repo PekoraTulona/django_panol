@@ -142,6 +142,10 @@
                             <i class="fa fa-list"></i> Administrar Categorias
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'estadisticas_panol'  %}">
+                            <i class="fas fa-bell"></i> Historial de solicitudes
+                    </li>
 
 
 
@@ -186,11 +190,6 @@
                     <a class="nav-link" href="{% url 'administrar_categorias_admin' %}">
                         <i class="fa fa-list"></i> Administrar Categorias
                     </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'estadisticas_panol'  %}">
-                        <i class="fas fa-chart-pie"></i> Historial de solicitudes
                 </li>
                 {% endblock %}
             </ul>
