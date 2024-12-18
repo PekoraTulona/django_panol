@@ -473,7 +473,7 @@ profesores_solicitudes = solicitudes.values(
     'usuario__last_name'
 ).annotate(
     total_solicitudes=Count('id'),
-    asignaturas=get_grouped_concat(solicitudes, 'asignatura__nombre')
+
 ).order_by('-total_solicitudes')
 
 @login_required
