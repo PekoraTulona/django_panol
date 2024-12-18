@@ -140,7 +140,7 @@ def login_view(request):
                     return JsonResponse({'success': True, 'redirect_url': 'dashboard_admin' if user.user_type == 'admin' else 'solicitudes'}, status=200)
 
                 if user.user_type == 'admin':
-                    return redirect('listar_usuarios')
+                    return redirect('graficos')
                 elif user.user_type == 'pañolero':
                     return redirect('solicitudes')
                 elif user.user_type == 'auxiliarpañol':
