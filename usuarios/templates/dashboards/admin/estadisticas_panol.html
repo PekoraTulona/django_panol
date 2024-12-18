@@ -2,116 +2,77 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Estadísticas del Pañol</h1>
-
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
-        </div>
-        <div class="card-body">
-            <form method="get">
-                <div class="row">
-                    <div class="col-md-3">
-                        <label>Estado</label>
-                        <select name="estado" class="form-control">
-                            <option value="">Todos los estados</option>
-                            {% for estado_valor, estado_nombre in estados_choices %}
-                                <option value="{{ estado_valor }}" 
-                                    {% if filtros.estado == estado_valor %}selected{% endif %}>
-                                    {{ estado_nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label>Profesor</label>
-                        <select name="profesor" class="form-control">
-                            <option value="">Todos los Profesores</option>
-                            {% for profesor in profesores %}
-                                <option value="{{ profesor.id }}"
-                                    {% if filtros.profesor_id == profesor.id %}selected{% endif %}>
-                                    {{ profesor.first_name }} {{ profesor.last_name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label>Fecha Inicio</label>
-                        <input type="date" name="fecha_inicio" class="form-control" 
-                               value="{{ filtros.fecha_inicio }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label>Fecha Fin</label>
-                        <input type="date" name="fecha_fin" class="form-control"
-                               value="{{ filtros.fecha_fin }}">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary mt-3">Filtrar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Estadísticas Generales -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Solicitudes</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ estadisticas.total_solicitudes }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="container">
+    <h2>Lista de Solicitudes</h2>
+    
+    <!-- Formulario de Filtros -->
+    <form method="get" class="mb-4">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-3">
+                {{ form.fecha_inicio.label_tag }}
+                {{ form.fecha_inicio }}
+            </div>
+            <div class="col-md-3">
+                {{ form.fecha_fin.label_tag }}
+                {{ form.fecha_fin }}
+            </div>
+            <div class="col-md-3">
+                {{ form.estado.label_tag }}
+                {{ form.estado }}
+            </div>
+            <div class="col-md-3">
+                {{ form.usuario.label_tag }}
+                {{ form.usuario }}
             </div>
         </div>
-    </div>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            
+            <!-- Botón para generar PDF de todas las solicitudes -->
+            <a href="{% url 'generar_pdf_todas_solicitudes' %}?fecha_inicio={{ request.GET.fecha_inicio }}&fecha_fin={{ request.GET.fecha_fin }}&estado={{ request.GET.estado }}&usuario={{ request.GET.usuario }}" 
+                class="btn btn-danger ms-2">
+                Generar PDF de todas las solicitudes
+            </a>
+         
+        </div>
+    </form>
 
     <!-- Tabla de Solicitudes -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Solicitudes</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Profesor</th>
-                            <th>Asignatura</th>
-                            <th>Estado</th>
-                            <th>Fecha Creación</th>
-                            <th>Herramientas</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for solicitud in solicitudes %}
-                        <tr>
-                            <td>{{ solicitud.id }}</td>
-                            <td>{{ solicitud.profesor }}</td>
-                            <td>{{ solicitud.asignatura }}</td>
-                            <td>
-                                <span class="badge badge-{{ solicitud.estado_color }}">
-                                    {{ solicitud.estado }}
-                                </span>
-                            </td>
-                            <td>{{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                            <td>{{ solicitud.items }}</td>
-                            <td>{{ solicitud.observaciones }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Fecha Creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes %}
+            <tr>
+                <td>{{ solicitud.id }}</td>
+                <td>{{ solicitud.usuario.get_full_name }}</td>
+                <td>
+                    <span class="badge bg-{{ solicitud.get_estado_color }}">
+                        {{ solicitud.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ solicitud.created_at }}</td>
+                <td>
+                    <a href="{% url 'detalle_solicitud3' solicitud.id %}" class="btn btn-sm btn-info me-1">
+                        <i class="fas fa-eye"></i> Ver
+                    </a>
+                    <a href="{% url 'generar_pdf_solicitud' solicitud.id %}" 
+                       class="btn btn-sm btn-danger">
+                        Generar PDF
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <style>
