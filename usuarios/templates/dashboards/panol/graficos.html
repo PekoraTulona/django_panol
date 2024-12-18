@@ -1,0 +1,465 @@
+{% extends "dashboards/dashboard_panolero.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .grafico-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    #filtrosContainer {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h1 class="m-0">Panel de Gráficos y Estadísticas</h1>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary" onclick="generarPDFGrafico()">
+                    <i class="fas fa-file-pdf me-2"></i>PDF Gráfico
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" id="resumenesEstadisticos">
+        <div class="col-md-3">
+            <div class="resumen-tarjeta" data-bs-toggle="tooltip" title="Información detallada de solicitudes">
+                <h5 class="text-primary">
+                    <i class="fas fa-clipboard-list me-2"></i>Solicitudes
+                </h5>
+                <div id="resumenSolicitudes">
+                    <p>Total: <span id="totalSolicitudes" class="fw-bold">-</span></p>
+                    <p>Últimos 30 días: <span id="solicitudesUltimos30Dias">-</span></p>
+                    <p>Promedio Diario: <span id="promedioSolicitudesDiarias">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="resumen-tarjeta" data-bs-toggle="tooltip" title="Estado de herramientas en inventario">
+                <h5 class="text-success">
+                    <i class="fas fa-tools me-2"></i>Herramientas
+                </h5>
+                <div id="resumenHerramientas">
+                    <p>Total: <span id="totalHerramientas" class="fw-bold">-</span></p>
+                    <p>Disponibles: <span id="herramientasDisponibles">-</span></p>
+                    <p>Agotadas: <span id="herramientasAgotadas">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="resumen-tarjeta" data-bs-toggle="tooltip" title="Estado del sistema y solicitudes pendientes">
+                <h5 class="text-warning">
+                    <i class="fas fa-server me-2"></i>Sistema
+                </h5>
+                <div id="resumenSistema">
+                    <p>Solicitudes Pendientes: <span id="solicitudesPendientes" class="fw-bold">-</span></p>
+                    <p>Solicitudes Vencidas: <span id="solicitudesVencidas">-</span></p>
+                    <p>Herramientas Rotas: <span id="herramientasRotas">-</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Columna de Filtros -->
+        <div class="col-md-3" id="filtrosContainer">
+            <h4>Configurar Gráficos</h4>
+            <form id="graficosForm">
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Gráfico</label>
+                    <select id="tipoGrafico" class="form-control">
+                        <option value="bar">Gráfico de Barras</option>
+                        <option value="pie">Gráfico de Pastel</option>
+                        <option value="line">Gráfico de Línea</option>
+                        <option value="radar">Gráfico Radar</option>
+                        <option value="doughnut">Gráfico de Anillo</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Datos a Visualizar</label>
+                    <select id="datoGrafico" class="form-control">
+                        <option value="solicitudes_asignatura">Solicitudes por Asignatura</option>
+                        <option value="herramientas_solicitadas">Herramientas Más Solicitadas</option>
+                        <option value="estados_solicitud">Estados de Solicitudes</option>
+                        <option value="solicitudes_profesor">Solicitudes por Profesor</option>
+                        <option value="solicitudes_mes">Solicitudes por Mes</option>
+                        <option value="categorias_herramientas">Herramientas por Categoría</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Rango de Fecha</label>
+                    <div class="row">
+                        <div class="col">
+                            <input type="date" id="fechaInicio" class="form-control">
+                        </div>
+                        <div class="col">
+                            <input type="date" id="fechaFin" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Opciones Adicionales</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="mostrarPorcentaje">
+                        <label class="form-check-label">
+                            Mostrar Porcentajes
+                        </label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100" onclick="generarGrafico()">
+                    Generar Gráfico
+                </button>
+            </form>
+        </div>
+
+        <!-- Columna de Gráficos -->
+        <div class="col-md-9">
+            <div class="grafico-container">
+                <canvas id="graficoPrincipal"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+
+<script>
+    // Variables globales para los gráficos
+    let graficoPrincipal = null;
+    let graficoSecundario1 = null;
+    let graficoSecundario2 = null;
+
+    // Función para generar colores dinámicamente
+    function generarColores(cantidad) {
+        const paleta = [
+            'rgba(255, 99, 132, 0.6)',   // Rojo
+            'rgba(54, 162, 235, 0.6)',   // Azul
+            'rgba(255, 206, 86, 0.6)',   // Amarillo
+            'rgba(75, 192, 192, 0.6)',   // Verde
+            'rgba(153, 102, 255, 0.6)',  // Morado
+            'rgba(255, 159, 64, 0.6)',   // Naranja
+            'rgba(199, 199, 199, 0.6)',  // Gris
+            'rgba(83, 102, 255, 0.6)',   // Azul oscuro
+            'rgba(40, 159, 64, 0.6)',    // Verde oscuro
+            'rgba(210, 99, 132, 0.6)'    // Rojo claro
+        ];
+        
+        return Array.from({length: cantidad}, (_, i) => paleta[i % paleta.length]);
+    }
+
+    // Función principal para generar gráficos
+    function generarGrafico() {
+        const tipoGrafico = document.getElementById('tipoGrafico').value;
+        const datoGrafico = document.getElementById('datoGrafico').value;
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        const mostrarPorcentaje = document.getElementById('mostrarPorcentaje').checked;
+
+        // Destruir gráficos anteriores
+        [graficoPrincipal, graficoSecundario1, graficoSecundario2].forEach(grafico => {
+            if (grafico) grafico.destroy();
+        });
+
+        // Llamada AJAX para obtener datos
+        fetch(`/solicitudes/obtener_datos_grafico_panol/?tipo=${datoGrafico}&inicio=${fechaInicio}&fin=${fechaFin}`)
+            .then(response => response.json())
+            .then(data => {
+                // Configuración de plugins
+                const plugins = mostrarPorcentaje ? [ChartDataLabels] : [];
+
+                // Opciones de plugin de porcentajes
+                const pluginOptions = mostrarPorcentaje ? {
+                    datalabels: {
+                        formatter: (value, context) => {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            return `${((value / total) * 100).toFixed(1)}%`;
+                        },
+                        color: 'white',
+                        font: { weight: 'bold', size: 12 },
+                        display: mostrarPorcentaje
+                    }
+                } : {};
+
+                // Configuración de colores
+                const backgroundColors = generarColores(data.labels.length);
+
+                // Gráfico Principal
+                const ctxPrincipal = document.getElementById('graficoPrincipal').getContext('2d');
+                graficoPrincipal = new Chart(ctxPrincipal, {
+                    type: tipoGrafico,
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: datoGrafico,
+                            data: data.valores,
+                            backgroundColor: backgroundColors
+                        }]
+                    },
+                    plugins: plugins,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { 
+                                display: true, 
+                                text: `Gráfico de ${datoGrafico}` 
+                            },
+                            datalabels: pluginOptions.datalabels
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener datos:', error);
+                alert('No se pudieron cargar los datos del gráfico');
+            });
+    }
+
+    // Función para generar PDF de un gráfico
+    function generarPDFGrafico() {
+        const { jsPDF } = window.jspdf;
+        // Cambiar a formato vertical y aumentar el tamaño
+        const doc = new jsPDF({
+            orientation: 'portrait', 
+            unit: 'mm', 
+            format: 'a4'  // Usar formato A4 completo
+        });
+    
+        const tipoGrafico = document.getElementById('tipoGrafico').value;
+        const datoGrafico = document.getElementById('datoGrafico').value;
+        const canvas = document.getElementById('graficoPrincipal');
+        
+        html2canvas(canvas).then(graficoImg => {
+            const imgData = graficoImg.toDataURL('image/png');
+            
+            // Dimensiones de página A4
+            const pageWidth = 210;  // Ancho de página A4
+            const pageHeight = 297; // Alto de página A4
+            
+            // Calcular dimensiones del gráfico
+            const imgWidth = 180;  // Ancho más grande
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+    
+            const fechaActual = new Date().toLocaleDateString();
+    
+            // Título principal
+            doc.setFontSize(18);
+            doc.setTextColor(40, 40, 40);
+            doc.text(`Informe de Gráfico: ${datoGrafico}`, pageWidth / 2, 20, { align: 'center' });
+    
+            // Subtítulo
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Tipo de Gráfico: ${tipoGrafico} | Fecha: ${fechaActual}`, pageWidth / 2, 30, { align: 'center' });
+    
+            // Añadir imagen del gráfico centrada
+            doc.addImage(imgData, 'PNG', (pageWidth - imgWidth) / 2, 50, imgWidth, imgHeight);
+    
+            // Datos detallados del gráfico
+            const datos = obtenerDatosGrafico();
+            let yPosition = imgHeight + 80;
+    
+            // Encabezado de datos
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Detalle de Datos', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 10;
+    
+            // Tabla de datos
+            doc.setFontSize(10);
+            doc.setTextColor(50, 50, 50);
+            
+            // Encabezados de tabla
+            doc.setFont('helvetica', 'bold');
+            doc.text('Etiqueta', 40, yPosition);
+            doc.text('Valor', 120, yPosition);
+            yPosition += 7;
+            doc.line(30, yPosition, pageWidth - 30, yPosition);
+            yPosition += 5;
+    
+            // Datos de la tabla
+            doc.setFont('helvetica', 'normal');
+            datos.labels.forEach((label, index) => {
+                doc.text(label, 40, yPosition);
+                doc.text(datos.valores[index].toString(), 120, yPosition);
+                yPosition += 7;
+            });
+    
+            // Resumen estadístico
+            yPosition += 10;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumen Estadístico', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 10;
+    
+            doc.setFont('helvetica', 'normal');
+            const total = datos.valores.reduce((a, b) => a + b, 0);
+            const promedio = total / datos.valores.length;
+    
+            doc.text(`Total: ${total}`, 40, yPosition);
+            yPosition += 7;
+            doc.text(`Promedio: ${promedio.toFixed(2)}`, 40, yPosition);
+            yPosition += 7;
+            doc.text(`Número de Categorías: ${datos.labels.length}`, 40, yPosition);
+    
+            // Pie de página
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Informe generado automáticamente', pageWidth / 2, pageHeight - 10, { align: 'center' });
+    
+            // Guardar PDF
+            doc.save(`grafico_${datoGrafico}_${fechaActual}.pdf`);
+        });
+    }
+    // Función para generar PDF completo
+    function generarPDFTodosLosDatos() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+    
+        fetch('/solicitudes/obtener_datos_completos_panol/')
+            .then(response => response.json())
+            .then(datosCompletos => {
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const fechaActual = new Date().toLocaleDateString();
+    
+                // Título principal
+                doc.setFontSize(18);
+                doc.setTextColor(40, 40, 40);
+                doc.text('Informe Completo de Datos', pageWidth / 2, 20, { align: 'center' });
+    
+                // Subtítulo con fecha
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Fecha de generación: ${fechaActual}`, pageWidth / 2, 30, { align: 'center' });
+    
+                let yPosition = 50;
+    
+                // Función para agregar sección
+                const agregarSeccion = (titulo, datos) => {
+                    // Título de sección
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(titulo, pageWidth / 2, yPosition, { align: 'center' });
+                    yPosition += 10;
+    
+                    // Datos de la sección
+                    doc.setFontSize(10);
+                    doc.setTextColor(50, 50, 50);
+    
+                    // Iterar sobre los datos
+                    Object.entries(datos).forEach(([key, value]) => {
+                        // Manejar diferentes tipos de datos
+                        if (typeof value === 'number') {
+                            doc.text(`${key}: ${value}`, 30, yPosition);
+                            yPosition += 7;
+                        } else if (Array.isArray(value)) {
+                            // Para listas de tuplas (como estados, categorías)
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(`${key}:`, 30, yPosition);
+                            yPosition += 7;
+                            doc.setFont('helvetica', 'normal');
+                            
+                            value.forEach(([subKey, subValue]) => {
+                                doc.text(`- ${subKey}: ${subValue}`, 40, yPosition);
+                                yPosition += 7;
+                            });
+                        }
+                    });
+    
+                    yPosition += 10;
+                    // Añadir línea separadora
+                    doc.line(20, yPosition, pageWidth - 20, yPosition);
+                    yPosition += 10;
+                };
+    
+                // Agregar cada sección
+                agregarSeccion('Resumen de Solicitudes', datosCompletos.solicitudes);
+                agregarSeccion('Resumen de Herramientas', datosCompletos.herramientas);
+                agregarSeccion('Resumen de Usuarios', datosCompletos.usuarios);
+                agregarSeccion('Resumen del Sistema', datosCompletos.sistema);
+    
+                // Pie de página
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Informe generado automáticamente', pageWidth / 2, pageHeight - 10, { align: 'center' });
+    
+                // Guardar PDF
+                doc.save(`informe_completo_${fechaActual}.pdf`);
+            })
+            .catch(error => {
+                console.error('Error al generar PDF:', error);
+                alert('No se pudo generar el informe PDF');
+            });
+    }
+    // Función auxiliar para obtener datos del gráfico actual
+    function obtenerDatosGrafico() {
+        return {
+            labels: graficoPrincipal ? graficoPrincipal.data.labels : [],
+            valores: graficoPrincipal ? graficoPrincipal.data.datasets[0].data : []
+        };
+    }
+
+    // Cargar estadísticas al iniciar
+    document.addEventListener('DOMContentLoaded', cargarEstadisticasResumen);
+    setInterval(cargarEstadisticasResumen, 5 * 60 * 1000); // Cada 5 minutos
+
+    function cargarEstadisticasResumen() {
+        fetch('/solicitudes/estadisticas_resumen_panol/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalSolicitudes').innerText = data.solicitudes.total_solicitudes;
+                document.getElementById('solicitudesUltimos30Dias').innerText = data.solicitudes.solicitudes_ultimos_30_dias;
+                document.getElementById('promedioSolicitudesDiarias').innerText = 
+                    data.solicitudes.promedio_solicitudes_diarias ? 
+                    data.solicitudes.promedio_solicitudes_diarias.toFixed(2) : 
+                    '0';
+
+                document.getElementById('totalHerramientas').innerText = data.herramientas.total_herramientas;
+                document.getElementById('herramientasDisponibles').innerText = data.herramientas.herramientas_disponibles;
+                document.getElementById('herramientasAgotadas').innerText = data.herramientas.herramientas_agotadas;
+
+                document.getElementById('solicitudesPendientes').innerText = data.sistema.solicitudes_pendientes;
+                document.getElementById('solicitudesVencidas').innerText = data.sistema.solicitudes_vencidas;
+                document.getElementById('herramientasRotas').innerText = data.sistema.herramientas_rotas;
+
+                document.getElementById('totalUsuarios').innerText = data.usuarios.total_usuarios;
+                const usuariosActivos = data.usuarios.usuarios_por_tipo.find(tipo => tipo.user_type === 'activo')?.total || 0;
+                document.getElementById('usuariosActivos').innerText = usuariosActivos;
+                document.getElementById('nuevosUsuarios').innerText = '-';
+            })
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+
+    
+#form-solicitud {
+    width: 60%;
+    margin: auto;
+}
+
+#search_tool {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+

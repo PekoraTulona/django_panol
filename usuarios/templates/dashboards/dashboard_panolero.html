@@ -1,0 +1,543 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pañolero</title>
+    <link rel="icon" href="{% static "images/icono.png" %}">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f4f6f9;
+            padding-top: 56px; /* Ajuste para el navbar fijo */
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px; /* Ajustado para que comience después del navbar */
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 20px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #bf0000; /* Cambiado a rojo */
+            color: white; /* Cambiar el color del texto a blanco */
+            width: 250px; /* Ancho fijo */
+        }
+        .sidebar .nav-link {
+            color: white; /* Asegura que los enlaces también sean blancos */
+        }
+        .sidebar .nav-link:hover {
+            color: #ffcccc; /* Opción para cambiar el color al pasar el mouse */
+        }
+        .content-wrapper {
+            margin-left: 250px; /* Mismo ancho que el sidebar */
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+            }
+            .content-wrapper {
+                margin-left: 0;
+            }
+        }
+        .admin-dashboard .navbar {
+            background-color: #bf0000;
+        }
+        .panol-dashboard .navbar {
+            background-color: #2c3e50;
+        }
+        .profesor-dashboard .navbar {
+            background-color: #006699;
+        }
+    </style>
+    
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{{ body_class }}">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+        <div class="container-fluid">
+            <button class="btn btn-outline-secondary me-3 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/Logotipo_Inacap.png' %}" alt="Logo INACAP" height="80">
+            </a>
+            <span class="navbar-brand d-flex flex-column align-items-center text-center mx-auto" style='width: 1200px; font-size:30px; height: 20px; '>Panel de Pañolero</span>
+            
+            <div class="ms-auto d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <a href="#" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                            <img src="{{ user.avatar.url }}" 
+                                 class="rounded-circle me-2" 
+                                 width="30" height="30" alt="Avatar">
+                            <div class="d-none d-md-block text-truncate" style="max-width: 150px;">
+                                {{ user.first_name }}<br>
+                                <small class="text-muted">{{ user.email }}</small>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url "cambiar_contraseña" %}">
+                                    <i class="fas fa-user"></i> Cambiar Contraseña
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">Iniciar Sesión</a>
+                {% endif %}
+            </div>
+    </nav>
+    <br>
+    <br>
+    <!-- Sidebar para pantallas grandes -->
+    <div class="col-md-2 col-lg-2 d-md-block sidebar">
+        <div class="position-sticky">
+            <ul class="nav flex-column">
+                {% block sidebar %}
+                <br><br><br>
+     
+                    <!-- En la sección de sidebar -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'solicitudes' %}">
+                            <i class="fas fa-shipping-fast"></i> Solicitudes
+                            <span class="badge bg-danger float-end" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'crear_solicitud_panol' %}">
+                            <i class="fas fa-address-book"></i></i> Solicitud Alumno
+                            <span class="badge bg-danger float-end" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'alumno_list' %}">
+                            <i class="fas fa-user-friends"></i></i> lista de alumnos
+                            <span class="badge bg-danger float-end" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'listar_usuarios_panolero' %}">
+                            <i class="fas fa-user-friends"></i></i> Lista de usuarios
+                            <span class="badge bg-danger float-end" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'listar_activos' %}">
+                            <i class="fas fa-laptop"></i> Activos fijos
+                            <span class="badge bg-danger float-end" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_solicitudes_panol' %}">
+                            <i class="fa fa-list"></i> Historial de solicitudes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'gestionar_salas' %}">
+                            <i class="fas fa-desktop"></i> Salas de Computacion
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url "administrar_herramientas" %}">
+                            <i class="fas fa-tools"></i> Administrar Herramientas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'administrar_categorias' %}">
+                            <i class="fas fa-clipboard-list"></i> Administrar Categorias
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_reportes_herramientas' %}">
+                            <i class="fas fa-dolly-flatbed"></i> Reportes de herramientas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url "graficos_panol" %}">
+                            <i class="fas fa-chart-line"></i> Graficos
+                        </a>
+                    </li>
+                {% endblock %}
+            </ul>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+        <br>
+    <!-- Offcanvas Sidebar para móviles -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menú</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+            <ul class="nav flex-column">
+                {% block mobile_sidebar %}
+                <br>
+                <br>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'solicitudes' %}">
+                        <i class="fas fa-shipping-fast"></i> Solicitudes
+                        <span class="badge bg-danger float-end" style="display: none;">0</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'listar_activos' %}">
+                        <i class="fas fa-tools"></i> Activos fijos
+                        <span class="badge bg-danger float-end" style="display: none;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'lista_solicitudes_panol' %}">
+                        <i class="fa fa-list"></i> Historial de solicitudes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'gestionar_salas' %}">
+                        <i class="fas fa-desktop"></i> Salas de Computacion
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "administrar_herramientas" %}">
+                        <i class="fas fa-tools"></i> Administrar Herramientas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'administrar_categorias' %}">
+                        <i class="fas fa-clipboard-list"></i> Administrar Categorias
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'lista_reportes_herramientas' %}">
+                        <i class="fas fa-dolly-flatbed"></i> Reportes de herramientas
+                    </a>
+                </li>
+                {% endblock %}
+            </ul>
+        </div>
+    </div>
+
+    
+
+    <!-- Contenido principal -->
+    <div class="content-wrapper">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    
+        <!-- Notificaciones de mantenimiento de activos -->
+        {% if notificaciones %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>¡Atención!</strong>
+                <ul>
+                    {% for notificacion in notificaciones %}
+                        <li>{{ notificacion }}</li>
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if messages %}
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        {% for message in messages %}
+        <div class="toast align-items-center text-bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(function (toastElement) {
+                var toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            });
+        });
+    </script>
+    
+
+    <script>
+        // Script para cerrar automáticamente los mensajes de alerta
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+
+    <script>
+        function actualizarNotificaciones() {
+            fetch("{% url 'api_numero_solicitudes' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const badgeElement = document.querySelector('.badge.bg-danger');
+                    if (data.num_solicitudes_nuevas > 0) {
+                        badgeElement.textContent = data.num_solicitudes_nuevas;
+                        badgeElement.style.display = 'inline';
+                    } else {
+                        badgeElement.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error al obtener notificaciones:', error));
+        }
+    
+        // Llama a la función cada 10 segundos
+        setInterval(actualizarNotificaciones, 10000);
+    
+        // Llama una vez al cargar la página
+        actualizarNotificaciones();
+
+
+        function actualizarNotificacionesMantenimiento() {
+            fetch("{% url 'api_obtener_notificaciones_mantenimiento' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const alertContainer = document.querySelector('.alert.alert-warning'); // Donde mostrarás las notificaciones
+                    if (data.notificaciones.length > 0) {
+                        alertContainer.innerHTML = '<strong>¡Atención!</strong><ul>';
+                        data.notificaciones.forEach(function(notificacion) {
+                            alertContainer.innerHTML += '<li>' + notificacion + '</li>';
+                        });
+                        alertContainer.innerHTML += '</ul>';
+                        alertContainer.style.display = 'block'; // Asegúrate de que esté visible
+                    } else {
+                        alertContainer.style.display = 'none'; // Ocultar si no hay notificaciones
+                    }
+                })
+                .catch(error => console.error('Error al obtener notificaciones de mantenimiento:', error));
+        }
+    
+        // Llama a la función cada 10 segundos
+        setInterval(actualizarNotificacionesMantenimiento, 10000);
+    
+        // Llama una vez al cargar la página
+        actualizarNotificacionesMantenimiento();
+    </script>
+
+    <script>
+        function actualizarNotificacionesActivos() {
+            // Hacer la petición para obtener las notificaciones de mantenimiento
+            fetch("{% url 'api_obtener_notificaciones_mantenimiento' %}")
+                .then(response => response.json())  // Convertimos la respuesta a JSON
+                .then(data => {
+                    console.log(data);  // Verifica la respuesta de la API en la consola
+        
+                    // Seleccionamos el elemento del badge en la barra de navegación
+                    const badgeElement = document.querySelector('.nav-link[href="{% url "listar_activos" %}"] .badge.bg-danger');
+        
+                    // Verificamos si hay notificaciones de activos que necesitan mantenimiento
+                    if (data.num_activos_necesitan_mantenimiento > 0) {
+                        badgeElement.textContent = data.num_activos_necesitan_mantenimiento;  // Actualiza el número
+                        badgeElement.style.display = 'inline';  // Muestra el badge
+                    } else {
+                        badgeElement.style.display = 'none';  // Oculta el badge si no hay notificaciones
+                    }
+                })
+                .catch(error => console.error('Error al obtener las notificaciones de mantenimiento:', error));  // Manejo de errores
+        }
+        
+        // Llama a la función cada 10 segundos
+        setInterval(actualizarNotificacionesActivos, 10000);
+        
+        // Llama una vez al cargar la página
+        actualizarNotificacionesActivos();
+        
+    </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selección de elementos
+            const modal = document.getElementById('modalMantenimiento');
+            const inputActivoId = document.getElementById('inputActivoId');
+            const inputFecha = document.getElementById('nuevaFechaMantenimiento');
+            const selectPrioridad = document.getElementById('selectPrioridad');
+            const btnGuardar = document.getElementById('btnGuardarMantenimiento');
+        
+            // Evento para abrir el modal
+            modal.addEventListener('show.bs.modal', function(event) {
+                console.log('Modal se está abriendo');
+                const button = event.relatedTarget;
+                const activoId = button.getAttribute('data-activo-id');
+                const activoPrioridad = button.getAttribute('data-activo-prioridad');
+        
+                // Establecer ID del activo
+                inputActivoId.value = activoId;
+                
+                // Establecer fecha actual como predeterminada
+                const today = new Date().toISOString().split('T')[0];
+                inputFecha.value = today;
+                
+                // Establecer prioridad actual
+                if (activoPrioridad) {
+                    selectPrioridad.value = activoPrioridad;
+                }
+                
+                console.log(`Modal abierto para Activo ID: ${activoId}, Prioridad actual: ${activoPrioridad}`);
+            });
+        
+            // Evento para guardar el mantenimiento
+            btnGuardar.addEventListener('click', function() {
+                const activoId = inputActivoId.value;
+                const nuevaFecha = inputFecha.value;
+                const prioridad = selectPrioridad.value;
+        
+                // Validaciones básicas
+                if (!activoId) {
+                    alert('Error: ID de activo no definido');
+                    return;
+                }
+        
+                if (!nuevaFecha) {
+                    alert('Por favor seleccione una fecha de mantenimiento');
+                    return;
+                }
+        
+                // Preparar datos para enviar
+                const data = {
+                    nueva_fecha_mantenimiento: nuevaFecha,
+                    prioridad: prioridad
+                };
+        
+                // Enviar solicitud AJAX
+                fetch(`/solicitudes/activos/${activoId}/actualizar_mantenimiento/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.success) {
+                        // Cerrar modal
+                        const modalInstance = bootstrap.Modal.getInstance(modal);
+                        modalInstance.hide();
+        
+                        // Mostrar mensaje de éxito
+                        alert(result.mensaje || 'Mantenimiento actualizado exitosamente');
+        
+                        // Recargar la página o actualizar la tabla
+                        location.reload();
+                    } else {
+                        // Mostrar error del servidor
+                        throw new Error(result.error || 'Error desconocido');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`Error: ${error.message}`);
+                });
+            });
+        });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const crearAlumnoForm = document.getElementById('crear-alumno-form');
+                const alumnoSelect = document.getElementById('id_alumno'); // Selector de alumnos en el formulario principal
+        
+                // Manejador del evento submit del formulario en el modal
+                crearAlumnoForm.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Evita el envío tradicional del formulario
+        
+                    // Recopila los datos del formulario
+                    const formData = new FormData(crearAlumnoForm);
+        
+                    // Envía la solicitud AJAX al servidor
+                    fetch('{% url "crear_alumno" %}', { // Cambia "crear_alumno" por el nombre de tu vista
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}' // Token CSRF para seguridad
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualiza el selector de alumnos con el nuevo alumno
+                            const newOption = document.createElement('option');
+                            newOption.value = data.alumno.id; // ID del nuevo alumno
+                            newOption.textContent = `${data.alumno.nombre} ${data.alumno.apellido}`; // Nombre completo
+                            alumnoSelect.appendChild(newOption);
+        
+                            // Cierra el modal y resetea el formulario
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('modalCrearAlumno'));
+                            modal.hide();
+                            crearAlumnoForm.reset();
+        
+                            // Selecciona automáticamente el nuevo alumno en el selector
+                            alumnoSelect.value = data.alumno.id;
+                        } else {
+                            // Muestra errores si los hay
+                            alert('Error al crear el alumno: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ocurrió un error al procesar la solicitud.');
+                    });
+                });
+            });
+        </script>
+        
+</body>
+</html>

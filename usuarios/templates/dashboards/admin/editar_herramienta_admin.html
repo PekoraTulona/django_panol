@@ -1,0 +1,16 @@
+{% extends 'dashboards/dashboard_admin.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Editar Herramienta: {{ herramienta.nombre }}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary">Editar Herramienta</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

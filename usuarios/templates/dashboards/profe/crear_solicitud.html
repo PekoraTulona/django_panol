@@ -1,0 +1,265 @@
+{% extends 'dashboards/dashboard_profesor.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Categorías -->
+        <div class="col-md-3 bg-light">
+            <h4>Categorías</h4>
+            <form method="get" id="filter-form">
+                {{ filtro_form|crispy }}
+                <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
+            </form>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Crear Nueva Solicitud</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="solicitud-form">
+                        {% csrf_token %}
+
+                        <!-- Información Principal de la Solicitud -->
+                        <div class="mb-4">
+                            <h4>Información de la Solicitud</h4>
+                            <div class="form-group">
+                                <label for="id_fecha_retiro"></label>
+                                {{ solicitud_form.fecha_retiro_solicitada|as_crispy_field }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_fecha_devolucion"></label>
+                                {{ solicitud_form.fecha_devolucion_solicitada|as_crispy_field }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_asignatura"></label>
+                                {{ solicitud_form.asignatura|as_crispy_field }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_observaciones"></label>
+                                {{ solicitud_form.observaciones|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h4>Herramientas en la Solicitud</h4>
+                            </div>
+                            <div class="card-body formset_container">
+                                {{ detalle_formset.management_form }}
+                                <div id="herramientas-seleccionadas">
+                                    {% for form in detalle_formset %}
+                                    <div class="row mb-3 formset_row">
+                                        <div class="col-md-5">
+                                            {{ form.herramienta|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ form.cantidad|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-danger btn-sm remove-row">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activos Fijos en la Solicitud -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h4>Activos Fijos en la Solicitud</h4>
+                            </div>
+                            <div class="card-body formset_container">
+                                <div id="activos-fijos-seleccionados"> <!-- Corregido aquí -->
+                                    {% for form in detalle_formset %}
+                                    <div class="row mb-3 formset_row">
+                                        <div class="col-md-5">
+                                            {{ form.activo_fijo|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ form.cantidad|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-danger btn-sm remove-row">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Listado Herramientas Disponibles -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h4>Herramientas Disponibles</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="herramientas-disponibles">
+                                    {% for herramienta in herramientas %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            {% if herramienta.imagen %}
+                                            <img src="{{ herramienta.imagen.url }}" class="card-img-top" alt="{{ herramienta.nombre }}" style="height: 200px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ herramienta.nombre }}</h5>
+                                                <p class="card-text">
+                                                    Categoría: {{ herramienta.categoria.nombre }}<br>
+                                                    Stock: {{ herramienta.stock_disponible }}
+                                                </p>
+                                                <button type="button" class="btn btn-success btn-sm add-to-request" data-id="{{ herramienta.id }}" data-nombre="{{ herramienta.nombre }}" data-stock="{{ herramienta.stock_disponible }}">
+                                                    Añadir a Solicitud
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Listado Activos Fijos Disponibles -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h4>Activos Fijos Disponibles</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="activos-fijos-disponibles">
+                                    {% for activo_fijo in activos_fijos %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            {% if activo_fijo.imagen %}
+                                            <img src="{{ activo_fijo.imagen.url }}" class="card-img-top" alt="{{ activo_fijo.nombre }}" style="height: 200px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ activo_fijo.nombre }}</h5>
+                                                <p class="card-text">
+                                                    Categoría: {{ activo_fijo.categoria.nombre }}<br>
+                                                    Stock: {{ activo_fijo.stock_disponible }}
+                                                </p>
+                                                <button type="button" class="btn btn-success btn-sm add-to-request-activo" data-id="{{ activo_fijo.id }}" data-nombre="{{ activo_fijo.nombre }}" data-stock="{{ activo_fijo.stock_disponible }}">
+                                                    Añadir a Solicitud
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Envío -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Crear Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const herramientasSeleccionadas = document.getElementById('herramientas-seleccionadas');
+        const activosFijosSeleccionados = document.getElementById('activos-fijos-seleccionados'); // Corregido aquí
+        const herramientasDisponibles = document.getElementById('herramientas-disponibles');
+        const activosFijosDisponibles = document.getElementById('activos-fijos-disponibles');
+        const totalFormsInput = document.querySelector('[name="detalles-TOTAL_FORMS"]');
+        const maxFormsInput = document.querySelector('[name="detalles-MAX_NUM_FORMS"]');
+
+        herramientasDisponibles.addEventListener('click', function (e) {
+            if (e.target.classList.contains('add-to-request')) {
+                const button = e.target;
+                const herramientaId = button.getAttribute('data-id');
+                const herramientaNombre = button.getAttribute('data-nombre');
+                const herramientaStock = button.getAttribute('data-stock');
+                const totalForms = parseInt(totalFormsInput.value);
+
+                const maxForms = parseInt(maxFormsInput.value);
+                if (totalForms < maxForms) {
+                    totalFormsInput.value = totalForms + 1;
+
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3', 'formset_row');
+                    newRow.innerHTML = `
+                        <div class="col-md-5">
+                            <input type="hidden" name="detalles-${totalForms}-herramienta" value="${herramientaId}">
+                            <input type="text" class="form-control" value="${herramientaNombre}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" name="detalles-${totalForms}-cantidad" class="form-control" max="${herramientaStock}" placeholder="Cantidad">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-danger btn-sm remove-row">Eliminar</button>
+                        </div>
+                    `;
+                    herramientasSeleccionadas.appendChild(newRow);
+                } else {
+                    alert('Número máximo de herramientas alcanzado.');
+                }
+            }
+        });
+
+        activosFijosDisponibles.addEventListener('click', function (e) {
+            if (e.target.classList.contains('add-to-request-activo')) {
+                const button = e.target;
+                const activoFijoId = button.getAttribute('data-id');
+                const activoFijoNombre = button.getAttribute('data-nombre');
+                const activoFijoStock = button.getAttribute('data-stock');
+                const totalForms = parseInt(totalFormsInput.value);
+
+                const maxForms = parseInt(maxFormsInput.value);
+                if (totalForms < maxForms) {
+                    totalFormsInput.value = totalForms + 1;
+
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3', 'formset_row');
+                    newRow.innerHTML = `
+                        <div class="col-md-5">
+                            <input type="hidden" name="detalles-${totalForms}-activo_fijo" value="${activoFijoId}">
+                            <input type="text" class="form-control" value="${activoFijoNombre}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" name="detalles-${totalForms}-cantidad" class="form-control" max="${activoFijoStock}" placeholder="Cantidad">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-danger btn-sm remove-row">Eliminar</button>
+                        </div>
+                    `;
+                    activosFijosSeleccionados.appendChild(newRow);
+                } else {
+                    alert('Número máximo de activos fijos alcanzado.');
+                }
+            }
+        });
+
+        herramientasSeleccionadas.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-row')) {
+                const row = e.target.closest('.formset_row');
+                row.remove();
+                totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
+            }
+        });
+
+        activosFijosSeleccionados.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-row')) {
+                const row = e.target.closest('.formset_row');
+                row.remove();
+                totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
+            }
+        });
+    });
+</script>
+
+{% endblock %}

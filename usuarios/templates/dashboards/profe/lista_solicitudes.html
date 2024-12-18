@@ -1,0 +1,113 @@
+{% extends 'dashboards/dashboard_profesor.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>Mis Solicitudes de Herramientas</h3>
+        </div>
+        <div class="card-body">
+            <!-- Filtro de estados -->
+            <form method="get" class="mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <select name="estado" class="form-control" onchange="this.form.submit()">
+                            <option value="">Todos los Estados</option>
+                            {% for estado_valor, estado_nombre in estados %}
+                                <option value="{{ estado_valor }}" 
+                                    {% if request.GET.estado == estado_valor %}selected{% endif %}>
+                                    {{ estado_nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Asignatura</th>
+                            <th>Estado</th>
+                            <th>Total Herramientas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for solicitud in solicitudes %}
+                        <tr>
+                            <td>{{ solicitud.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                {{ solicitud.asignatura.nombre }} 
+                                ({{ solicitud.asignatura.get_diurno_nocturno_display }})
+                            </td>
+                            <td>
+                                {% if solicitud.estado == 'pendiente' %}
+                                    <span class="badge badge-warning">Pendiente</span>
+                                {% elif solicitud.estado == 'aprobado' %}
+                                    <span class="badge badge-success">Aprobado</span>
+                                {% elif solicitud.estado == 'rechazado' %}
+                                    <span class="badge badge-danger">Rechazado</span>
+                                {% elif solicitud.estado == 'cancelado' %}
+                                    <span class="badge badge-secondary">Cancelado</span>
+                                {% else %}
+                                    <span class="badge badge-info">{{ solicitud.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ solicitud.detalles.count }}</td>
+                            <td>
+                                <a href="{% url 'detalle_solicitud' solicitud.id %}" 
+                                   class="btn btn-info btn-sm">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No has realizado ninguna solicitud aún.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if solicitudes.has_previous %}
+                        <a href="?page=1">&laquo; primera</a>
+                        <a href="?page={{ solicitudes.previous_page_number }}">anterior</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Página {{ solicitudes.number }} de {{ solicitudes.paginator.num_pages }}.
+                    </span>
+
+                    {% if solicitudes.has_next %}
+                        <a href="?page={{ solicitudes.next_page_number }}">siguiente</a>
+                        <a href="?page={{ solicitudes.paginator.num_pages }}">última &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-warning { background-color: #ffc107; color: #212529; }
+    .badge-success { background-color: #28a745; color: #ffffff; }
+    .badge-danger { background-color: #dc3545; color: #ffffff; }
+    .badge-primary { background-color: #007bff; color: #ffffff; }
+    .badge-info { background-color: #17a2b8; color: #ffffff; }
+    .badge-secondary { background-color: #6c757d; color: #ffffff; }
+</style>
+
+
+{% endblock %}

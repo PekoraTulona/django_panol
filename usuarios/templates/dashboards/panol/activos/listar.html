@@ -1,0 +1,180 @@
+{% extends "dashboards/dashboard_panolero.html" %}
+
+{% block content %}
+<script type="text/javascript">
+    var csrf_token = '{{ csrf_token }}';  // Esto lo obtiene Django directamente
+</script>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Listado de Activos Fijos</h2>
+
+    <!-- Formulario de búsqueda -->
+    <form method="GET" class="d-flex mb-4">
+        <input type="text" name="nombre" class="form-control me-2" placeholder="Buscar por nombre" style="max-width: 300px;">
+        <select name="categoria" class="form-control me-2" style="max-width: 200px;">
+            <option value="">Todas las Categorías</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+            {% endfor %}
+        </select>
+        <select name="prioridad" class="form-control me-2" style="max-width: 200px;">
+            <option value="">Todas las Prioridades</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    <!-- Botón de Crear Activo -->
+    <div class="mb-4">
+        <a href="{% url 'crear_activo' %}" class="btn btn-success">Crear Nuevo Activo</a>
+    </div>
+
+    <!-- Tabla de activos -->
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Prioridad</th>
+                <th>Stock Total</th>
+                <th>Stock Disponible</th>
+                <th>Último Mantenimiento</th>
+                <th>Próximo Mantenimiento</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+                <th>Mantenimiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activo in activos %}
+            <tr>
+                <td>{{ activo.nombre }}</td>
+                <td>{{ activo.categoria.nombre }}</td>
+                <td>
+                    {% if activo.prioridad == 'alta' %}
+                        <span class="badge bg-danger">Alta</span>
+                    {% elif activo.prioridad == 'media' %}
+                        <span class="badge bg-warning text-dark">Media</span>
+                    {% else %}
+                        <span class="badge bg-success">Baja</span>
+                    {% endif %}
+                </td>
+                <td>{{ activo.stock_total }}</td>
+                <td>
+                    {% if activo.stock_disponible == 0 %}
+                        <span class="badge bg-danger">Agotado</span>
+                    {% else %}
+                        {{ activo.stock_disponible }}
+                    {% endif %}
+                </td>
+                <td>{{ activo.fecha_ultimo_mantenimiento|date:"d/m/Y" }}</td>
+                <td>{{ activo.fecha_proximo_mantenimiento|date:"d/m/Y" }}</td>
+                <td>
+                    {% if activo.roto %}
+                        <span class="badge bg-danger">Roto</span>
+                    {% else %}
+                        <span class="badge bg-success">Operativo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'editar_activo' activo.pk %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" class="btn btn-danger btn-sm" onclick="confirmarEliminacion({{ activo.pk }})">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalMantenimiento" 
+                            data-activo-id="{{ activo.id }}"
+                            data-activo-prioridad="{{ activo.prioridad }}">
+                        <i class="fas fa-wrench"></i> Mantenimiento
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal para Actualizar Mantenimiento -->
+<div class="modal fade" id="modalMantenimiento" tabindex="-1" aria-labelledby="modalMantenimientoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMantenimientoLabel">Actualizar Mantenimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formMantenimiento">
+                    {% csrf_token %}
+                    <input type="hidden" id="inputActivoId" name="activo_id">
+                    <div class="form-group mb-3">
+                        <label for="nuevaFechaMantenimiento">Fecha de realización del mantenimiento</label>
+                        <input type="date" 
+                               id="nuevaFechaMantenimiento" 
+                               name="nueva_fecha_mantenimiento" 
+                               class="form-control" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectPrioridad">Prioridad</label>
+                        <select id="selectPrioridad" name="prioridad" class="form-control">
+                            <option value="alta">Alta</option>
+                            <option value="media" selected>Media</option>
+                            <option value="baja">Baja</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarMantenimiento" class="btn btn-primary">Guardar</button> </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminacion(activoId) {
+        if (confirm('¿Estás seguro de que quieres eliminar este activo?')) {
+            window.location.href = "{% url 'eliminar_activo' 0 %}".replace('0', activoId);
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "dashboards/dashboard_panolero.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    .herramientas-rotas {
+        margin-top: 30px;
+    }
+    .badge-rota {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Reportes de Herramientas</h1>
+
+    <!-- Formulario de Filtros para Reportes -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <select name="tipo_reporte" class="form-control">
+                    <option value="">Todos los Tipos</option>
+                    {% for tipo, label in tipos_reporte %}
+                    <option value="{{ tipo }}" {% if filtro_tipo == tipo %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="herramienta" class="form-control" 
+                       placeholder="Buscar por Herramienta"
+                       value="{{ filtro_herramienta }}">
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="profesor" class="form-control" 
+                       placeholder="Buscar por Profesor"
+                       value="{{ filtro_profesor }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="fecha_inicio" class="form-control" 
+                       placeholder="Fecha Inicio"
+                       value="{{ filtro_fecha_inicio }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="fecha_fin" class="form-control" 
+                       placeholder="Fecha Fin"
+                       value="{{ filtro_fecha_fin }}">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
+    </form>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        Error: {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Tabla de Reportes -->
+    <h3>Reportes Pendientes ({{ reportes_pendientes.count }})</h3>
+    {% if reportes_pendientes %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Herramienta</th>
+                <th>Profesor</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reporte in reportes_pendientes %}
+            <tr>
+                <td>{{ reporte.herramienta.nombre }}</td>
+                <td>{{ reporte.profesor.get_full_name }}</td>
+                <td>{{ reporte.get_tipo_reporte_display }}</td>
+                <td>{{ reporte.cantidad }}</td>
+                <td>{{ reporte.fecha_reporte }}</td>
+                <td>
+                    <a href="{% url 'detalle_reporte_herramienta' reporte.id %}" 
+                       class="btn btn-info btn-sm">
+                        <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No hay reportes pendientes.</p>
+    {% endif %}
+
+    <!-- Sección de Herramientas Rotas -->
+    <div class="herramientas-rotas">
+        <div class="card">
+            <div class="card-header">
+                <h3>Herramientas Rotas</h3>
+            </div>
+            <div class="card-body">
+                <!-- Formulario de Filtros para Herramientas Rotas -->
+                <form method="get" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="herramienta_ro ota" class="form-control" 
+                                   placeholder="Buscar por Herramienta Rota"
+                                   value="{{ filtro_herramienta_rota }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="tipo_reporte_rota" class="form-control">
+                                <option value="">Todos los Tipos</option>
+                                {% for tipo, label in tipos_reporte %}
+                                <option value="{{ tipo }}" {% if filtro_tipo_reporte_rota == tipo %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" name="fecha_inicio_rota" class="form-control" 
+                                   placeholder="Fecha Inicio"
+                                   value="{{ filtro_fecha_inicio_rota }}">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" name="fecha_fin_rota" class="form-control" 
+                                   placeholder="Fecha Fin"
+                                   value="{{ filtro_fecha_fin_rota }}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
+                </form>
+
+                {% if herramientas_rotas %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Código</th>
+                            <th>Categoría</th>
+                            <th>Reportado Por</th>
+                            <th>Fecha de Rotura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for herramienta in herramientas_rotas %}
+                        <tr>
+                            <td>{{ herramienta.nombre }}</td>
+                            <td>{{ herramienta.codigo }}</td>
+                            <td>{{ herramienta.categoria.nombre }}</td>
+                            <td>{{ herramienta.reportado_por.get_full_name }}</td>
+                            <td>{{ herramienta.fecha_reporte_rota }}</td>  <!-- Asegúrate de que este campo exista en tu modelo -->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No hay herramientas rotas reportadas.</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'generar_pdf_reportes' %}?tipo_reporte={{ filtro_tipo }}&herramienta={{ filtro_herramienta }}&estado={{ filtro_estado }}&fecha_inicio={{ filtro_fecha_inicio }}&fecha_fin={{ filtro_fecha_fin }}&herramienta_rota={{ filtro_herramienta_rota }}&tipo_reporte_rota={{ filtro_tipo_reporte_rota }}&fecha_inicio_rota={{ filtro_fecha_inicio_rota }}&fecha_fin_rota={{ filtro_fecha_fin_rota }}" 
+                class="btn btn-primary">Generar PDF</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

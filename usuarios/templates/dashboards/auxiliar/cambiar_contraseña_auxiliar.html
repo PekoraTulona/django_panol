@@ -1,0 +1,70 @@
+{% extends 'dashboards/dashboard_auxiliar.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Cambiar Contraseña</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.contrasena_actual.label_tag }}
+            {{ form.contrasena_actual }}
+            {% if form.contrasena_actual.errors %}
+                <div class="text-danger">
+                    {% for error in form.contrasena_actual.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.nueva_contrasena.label_tag }}
+            {{ form.nueva_contrasena }}
+            {% if form.nueva_contrasena.errors %}
+                <div class="text-danger">
+                    {% for error in form.nueva_contrasena.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if form.nueva_contrasena.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.nueva_contrasena.help_text }}
+                </small>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.confirmar_contrasena.label_tag }}
+            {{ form.confirmar_contrasena }}
+            {% if form.confirmar_contrasena.errors %}
+                <div class="text-danger">
+                    {% for error in form.confirmar_contrasena.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+    </form>
+</div>
+{% endblock %}

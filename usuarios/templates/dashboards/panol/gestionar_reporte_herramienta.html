@@ -1,0 +1,39 @@
+{% extends "dashboards/dashboard_panolero.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalles del Reporte</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Reporte de {{ reporte.herramienta.nombre }}</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Tipo de Reporte:</strong> {{ reporte.get_tipo_reporte_display }}</p>
+            <p><strong>Cantidad:</strong> {{ reporte.cantidad }}</p>
+            <p><strong>Fecha:</strong> {{ reporte.fecha_reporte }}</p>
+            <p><strong>Estado:</strong> {{ reporte.get_estado_display }}</p>
+            
+            {% if reporte.observaciones %}
+                <p><strong>Observaciones:</strong> {{ reporte.observaciones }}</p>
+            {% endif %}
+        </div>
+        
+        {% if puede_gestionar and reporte.estado == 'pendiente' %}
+        <div class="card-footer">
+            <form method="post">
+                {% csrf_token %}
+                <div class="btn-group">
+                    <button type="submit" name="accion" value="confirmar" class="btn btn-success">
+                        Confirmar Reporte
+                    </button>
+                    <button type="submit" name="accion" value="rechazar" class="btn btn-danger">
+                        Rechazar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

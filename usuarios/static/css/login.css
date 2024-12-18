@@ -1,0 +1,30 @@
+
+
+.card {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    opacity: 0.95;
+}
+
+.card h2 {
+    font-weight: bold;
+}
+
+.btn-danger {
+    background-color: #797979;
+    color: #ffffff;
+    border: 2px solid #fff;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+    border: 2px solid #fff;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}

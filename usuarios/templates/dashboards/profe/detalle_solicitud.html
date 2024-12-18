@@ -1,0 +1,141 @@
+{% extends 'dashboards/dashboard_profesor.html' %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3>Detalles de Solicitud</h3>
+            {% if solicitud.estado == 'pendiente' %}
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelarSolicitudModal">
+                <i class="fas fa-times-circle"></i> Cancelar Solicitud
+            </button>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Información de la Solicitud</h4>
+                    <table class="table">
+                        <tr>
+                            <th>Fecha de Creación:</th>
+                            <td>{{ solicitud.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Asignatura:</th>
+                            <td>
+                                {{ solicitud.asignatura.nombre }} 
+                                ({{ solicitud.asignatura.get_diurno_nocturno_display }})
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Estado:</th>
+                            <td>
+                                {% if solicitud.estado == 'pendiente' %}
+                                    <span class="badge badge-warning">Pendiente</span>
+                                {% elif solicitud.estado == 'aprobado' %}
+                                    <span class="badge badge-success">Aprobado</span>
+                                {% elif solicitud.estado == 'rechazado' %}
+                                    <span class="badge badge-danger">Rechazado</span>
+                                {% elif solicitud.estado == 'cancelado' %}
+                                    <span class="badge badge-secondary">Cancelado</span>
+                                {% else %}
+                                    <span class="badge badge-info">{{ solicitud.estado }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if solicitud.observaciones %}
+                        <tr>
+                            <th>Observaciones:</th>
+                            <td>{{ solicitud.observaciones }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h4>Herramientas Solicitadas</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Herramientas y Activos Fijos</th>
+                                <th>Cantidad</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detalle in detalles %}
+                            <tr>
+                                <td>{{ detalle.herramienta.nombre }} {{ detalle.activo_fijo.nombre }}</td>
+                                <td>{{ detalle.cantidad }}</td>
+                           
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay herramientas en esta solicitud</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'lista_solicitudes' %}" class="btn btn-secondary">
+                Volver a la Lista de Solicitudes
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cancelación -->
+<div class="modal fade" id="cancelarSolicitudModal" tabindex="-1" aria-labelledby="cancelarSolicitudModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelarSolicitudModalLabel">Confirmar Cancelación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea cancelar esta solicitud?</p>
+                <p class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+                <a href="{% url 'cancelar_solicitud' solicitud.id %}" class="btn btn-danger">
+                    <i class="fas fa-check"></i> Confirmar Cancelación
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-warning { background-color: #ffc107; color: #212529; }
+    .badge-success { background-color: #28a745; color: #ffffff; }
+    .badge-danger { background-color: #dc3545; color: #ffffff; }
+    .badge-primary { background-color: #007bff; color: #ffffff; }
+    .badge-info { background-color: #17a2b8; color: #ffffff; }
+    .badge-secondary { background-color: #6c757d; color: #ffffff; }
+</style>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Opcional: Agregar confirmación adicional
+        $('#cancelarSolicitudBtn').on('click', function(e) {
+            if (!confirm('¿Está seguro de cancelar esta solicitud?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

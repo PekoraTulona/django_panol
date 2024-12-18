@@ -1,0 +1,28 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Historial de Uso de Salas</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sala</th>
+                <th>Usuario</th>
+                <th>Hora de Inicio</th>
+                <th>Hora de Fin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.sala.nombre }}</td>
+                <td>{{ registro.alumno.get_full_name }}</td>
+                <td>{{ registro.hora_inicio }}</td>
+                <td>{{ registro.hora_fin|default:"En uso" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

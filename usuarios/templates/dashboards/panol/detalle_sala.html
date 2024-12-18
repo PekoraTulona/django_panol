@@ -1,0 +1,44 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalles de Sala: {{ sala.nombre }}</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            Información de la Sala
+        </div>
+        <div class="card-body">
+            <p><strong>Nombre:</strong> {{ sala.nombre }}</p>
+            <p><strong>Descripción:</strong> {{ sala.descripcion }}</p>
+            <p><strong>Capacidad:</strong> {{ sala.capacidad }}</p>
+            <p>
+                <strong>Estado:</strong> 
+                <span class="badge bg-{{ sala.get_estado_color }}">
+                    {{ sala.get_estado_display }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Historial Reciente de Uso</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rut</th>
+                <th>Hora de Inicio</th>
+                <th>Hora de Fin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros_recientes %}
+            <tr>
+                <td>{{ registro.alumno.rut }}</td>
+                <td>{{ registro.hora_inicio }}</td>
+                <td>{{ registro.hora_fin|default:"En uso" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

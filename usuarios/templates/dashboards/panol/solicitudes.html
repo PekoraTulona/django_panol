@@ -1,0 +1,145 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Dashboard Pañolero</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-hourglass-half"></i> Solicitudes Pendientes 
+                        {% if num_solicitudes_nuevas > 0 %}
+                            <span class="badge bg-danger float-end">{{ num_solicitudes_nuevas }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for solicitud in solicitudes_pendientes %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Solicitud #{{ solicitud.id }}</strong>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user"></i> {{ solicitud.usuario.first_name}} 
+                                        | <i class="fas fa-book"></i> {{ solicitud.asignatura.nombre }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{% url 'detalle_solicitud2' solicitud.id %}" class="btn btn-sm btn-info me-1">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                    <a href="{% url 'procesar_solicitud' solicitud.id %}" class="btn btn-sm btn-success me-1">
+                                        <i class="fas fa-check"></i> Aprobar
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay solicitudes pendientes
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle"></i> Solicitudes Aprobadas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for solicitud in solicitudes_aprobadas %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Solicitud #{{ solicitud.id }}</strong>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user"></i> {{ solicitud.usuario.first_name }} 
+                                        | <i class="fas fa-book"></i> {{ solicitud.asignatura.nombre }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{% url 'detalle_solicitud2' solicitud.id %}" class="btn btn-sm btn-info me-1">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                    <form method="POST" action="{% url 'procesar_solicitud' solicitud.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="accion" value="en_proceso">
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-play"></i> Iniciar Préstamo
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay solicitudes aprobadas
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-spinner"></i> Solicitudes en Proceso
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for solicitud in solicitudes_en_proceso %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Solicitud #{{ solicitud.id }}</strong>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user"></i> {{ solicitud.usuario.first_name }} 
+                                        | <i class="fas fa-book"></i> {{ solicitud.asignatura.nombre }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{% url 'detalle_solicitud2' solicitud.id %}" class="btn btn-sm btn-info me-1">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                    <form method="POST" action="{% url 'procesar_solicitud' solicitud.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="accion" value="completar">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check-double"></i> Completar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay solicitudes en proceso
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+
+<script>
+        setTimeout(function() {
+            location.reload();
+        }, 20000); 
+</script>
+{% endblock %}

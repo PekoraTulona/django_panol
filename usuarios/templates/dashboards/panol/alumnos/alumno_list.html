@@ -1,0 +1,41 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<title>Lista de Alumnos</title>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Lista de Alumnos</h1>
+    <a href="{% url 'alumno_create' %}" class="btn btn-primary mb-3">Nuevo Alumno</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>RUT</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alumno in alumnos %}
+            <tr>
+                <td>{{ alumno.nombres }}</td>
+                <td>{{ alumno.apellidos }}</td>
+                <td>{{ alumno.rut }}</td>
+                <td>{{ alumno.correo }}</td>
+                <td>
+                    <a href="{% url 'alumno_update' alumno.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'alumno_delete' alumno.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este alumno?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "dashboards/dashboard_panolero.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Activo</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_nombre" class="form-label">Nombre</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}
+                    <div class="text-danger">
+                        {% for error in form.nombre.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="id_categoria" class="form-label">Categoría</label>
+                {{ form.categoria }}
+                {% if form.categoria.errors %}
+                    <div class="text-danger">
+                        {% for error in form.categoria.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_prioridad" class="form-label">Prioridad</label>
+                {{ form.prioridad }}
+                {% if form.prioridad.errors %}
+                    <div class="text-danger">
+                        {% for error in form.prioridad.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="id_codigo" class="form-label">Código</label>
+                {{ form.codigo }}
+                {% if form.codigo.errors %}
+                    <div class="text-danger">
+                        {% for error in form.codigo.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_fecha_ultimo_mantenimiento" class="form-label">Fecha Último Mantenimiento</label>
+                {{ form.fecha_ultimo_mantenimiento }}
+                {% if form.fecha_ultimo_mantenimiento.errors %}
+                    <div class="text-danger">
+                        {% for error in form.fecha_ultimo_mantenimiento.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="id_fecha_proximo_mantenimiento" class="form-label">Fecha Próximo Mantenimiento</label>
+                {{ form.fecha_proximo_mantenimiento }}
+                {% if form.fecha_proximo_mantenimiento.errors %}
+                    <div class="text-danger">
+                        {% for error in form.fecha_proximo_mantenimiento.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_stock_total" class="form-label">Stock Total</label>
+                {{ form.stock_total }}
+                {% if form.stock_total.errors %}
+                    <div class="text-danger">
+                        {% for error in form.stock_total.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="id_stock_disponible" class="form-label">Stock Disponible</label>
+                {{ form.stock_disponible }}
+                {% if form.stock_disponible.errors %}
+                    <div class="text-danger">
+                        {% for error in form.stock_disponible.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_descripcion" class="form-label">Descripción</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+                <div class="text-danger">
+                    {% for error in form.descripcion.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar </button>
+    </form>
+</div>
+{% endblock %}

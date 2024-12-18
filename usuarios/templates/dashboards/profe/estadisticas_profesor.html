@@ -1,0 +1,188 @@
+{% extends 'dashboards/dashboard_profesor.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>Mis Estadísticas de Solicitudes</h3>
+        </div>
+        <div class="card-body">
+            <!-- Filtros -->
+            <form method="GET" class="mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <select name="año" class="form-control">
+                            {% for año in años %}
+                                <option value="{{ año }}" {% if año == año_actual %}selected{% endif %}>
+                                    {{ año }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="mes" class="form-control">
+                            {% for mes in meses %}
+                                <option value="{{ mes.numero }}" 
+                                    {% if mes.numero == mes_actual|add:0 %}selected{% endif %}>
+                                    {{ mes.nombre|capfirst }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="asignatura" class="form-control">
+                            <option value="">Todas las Asignaturas</option>
+                            {% for asignatura in asignaturas %}
+                                <option value="{{ asignatura.id }}"
+                                    {% if asignatura.id|stringformat:"i" == asignatura_seleccionada|stringformat:"i" %}selected{% endif %}>
+                                    {{ asignatura.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Resumen de Estadísticas -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-header">Total Solicitudes</div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ total_solicitudes }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-header">Aprobadas</div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ solicitudes_aprobadas }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning mb-3">
+                        <div class="card-header">Pendientes</div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ solicitudes_pendientes }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-header">Rechazadas</div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ solicitudes_rechazadas }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Solicitudes por Asignatura</div>
+                        <div class="card-body">
+                            {% if datos_asignaturas.labels|length > 0 %}
+                                <canvas id="graficoPorAsignatura"></canvas>
+                            {% else %}
+                                <p class="text-center text-muted">No hay datos disponibles</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Solicitudes por Mes</div>
+                        <div class="card-body">
+                            {% if datos_meses.labels|length > 0 %}
+                                <canvas id="graficoPorMes"></canvas>
+                            {% else %}
+                                <p class="text-center text-muted">No hay datos disponibles</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para los gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if datos_asignaturas.labels|length > 0 %}
+    const ctxAsignatura = document.getElementById('graficoPorAsignatura').getContext('2d');
+    const graficoPorAsignatura = new Chart(ctxAsignatura, {
+        type: 'bar',
+        data: {
+            labels: {{ datos_asignaturas.labels|safe }},
+            datasets: [{
+                label: 'Solicitudes',
+                data: {{ datos_asignaturas.data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Solicitudes'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Asignaturas'
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if datos_meses.labels|length > 0 %}
+    const ctxMes = document.getElementById('graficoPorMes').getContext('2d');
+    const graficoPorMes = new Chart(ctxMes, {
+        type: 'line',
+        data: {
+            labels: {{ datos_meses.labels|safe }},
+            datasets: [{
+                label: 'Solicitudes',
+                data: {{ datos_meses.data|safe }},
+                fill: false,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Solicitudes'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Meses'
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

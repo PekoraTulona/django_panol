@@ -1,0 +1,176 @@
+{% extends 'dashboards/dashboard_admin.html' %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Gestión de Asignaturas</h2>
+    
+    <!-- Botón para crear nueva asignatura -->
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#crearAsignaturaModal">
+        Crear Asignatura
+    </button>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Tabla de Asignaturas -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Modalidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asignatura in asignaturas %}
+            <tr>
+                <td>{{ asignatura.nombre }}</td>
+                <td>{{ asignatura.diurno_nocturno }}</td>
+                <td>
+                    <!-- Botones de editar y eliminar con triggers de modal -->
+                    <button type="button" class="btn btn-sm btn-warning" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editarAsignaturaModal"
+                        data-pk="{{ asignatura.pk }}"
+                        data-nombre="{{ asignatura.nombre }}"
+                        data-modalidad="{{ asignatura.diurno_nocturno }}">
+                        Editar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#eliminarAsignaturaModal"
+                        data-pk="{{ asignatura.pk }}"
+                        data-nombre="{{ asignatura.nombre }}">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal Crear Asignatura -->
+    <div class="modal fade" id="crearAsignaturaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Nueva Asignatura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'crear_asignatura' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {{ form.as_p }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Asignatura -->
+    <div class="modal fade" id="editarAsignaturaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Asignatura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'editar_asignatura' 0 %}" id="editForm">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" name="nombre" class="form-control" id="editNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Modalidad</label>
+                            <select name="diurno_nocturno" class="form-control" id="editModalidad" required>
+                                <option value="Diurno">Diurno</option>
+                                <option value="Nocturno">Nocturno</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Asignatura -->
+    <div class="modal fade" id="eliminarAsignaturaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'eliminar_asignatura' 0 %}" id="deleteForm">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>¿Estás seguro de eliminar la asignatura: <strong id="nombreAsignaturaEliminar"></strong>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script para manejar modales de edición y eliminación
+    document.addEventListener('DOMContentLoaded', function() {
+        const editModal = document.getElementById('editarAsignaturaModal');
+        const deleteModal = document.getElementById('eliminarAsignaturaModal');
+        const editForm = document.getElementById('editForm');
+        const deleteForm = document.getElementById('deleteForm');
+
+        // Modal de Edición
+        editModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const pk = button.getAttribute('data-pk');
+            const nombre = button.getAttribute('data-nombre');
+            const modalidad = button.getAttribute('data-modalidad');
+
+            // Actualizar URL del formulario
+            editForm.action = `/asignaturas/editar/${pk}/`;
+
+            // Llenar campos
+            document.getElementById('editNombre').value = nombre;
+            document.getElementById('editModalidad').value = modalidad;
+        });
+
+        // Modal de Eliminación
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const pk = button.getAttribute('data-pk');
+            const nombre = button.getAttribute('data-nombre');
+
+            // Actualizar URL del formulario
+            deleteForm.action = `/asignaturas/eliminar/${pk}/`;
+
+            // Mostrar nombre de la asignatura a eliminar
+            document.getElementById('nombreAsignaturaEliminar').textContent = nombre;
+        });
+    });
+</script>
+{% endblock %}

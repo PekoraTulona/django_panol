@@ -1,0 +1,75 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-list"></i> Detalles de Solicitud #{{ solicitud.id }}
+                    </h4>
+                    <span class="badge bg-{{ solicitud.get_estado_color }}">
+                        {{ solicitud.get_estado_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Información del Solicitante</h5>
+                            <p><strong><i class="fas fa-user"></i> Nombre:</strong> {{ solicitud.usuario.first_name }}</p>
+                            <p><strong>Tipo de Usuario:</strong> {{ solicitud.usuario.get_user_type_display }}</p>
+                            <p><strong>Asignatura:</strong> {{ solicitud.asignatura.nombre }}</p>
+                            <p><strong>Nombre del Alumno</strong> {{ solicitud.alumno.nombres|default:"No especificada" }}{{ solicitud.alumno.apellidos|default:"No especificada" }} <br> <strong>Correo:</strong> {{ solicitud.alumno.correo|default:"No especificada" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Fechas</h5>
+                            <p><strong><i class="fas fa-calendar-alt"></i> Retiro Solicitado:</strong> 
+                                {{ solicitud.fecha_retiro_solicitada|default:"No especificado" }}</p>
+                            <p><strong><i class="fas fa-calendar-check"></i> Devolución Solicitada:</strong> 
+                                {{ solicitud.fecha_devolucion_solicitada|default:"No especificado" }}</p>
+                        </div>
+                    </div>
+
+                    <h5><i class="fas fa-tools"></i> Herramientas Solicitadas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Herramientas y Activos Fijos</th>
+                                    <th>Cantidad</th>
+                                    <th>Stock Disponible</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detalle in detalles %}
+                                    <tr>
+                                        <td>{{ detalle.herramienta.nombre }} {{ detalle.activo_fijo.nombre }}</td>
+                                        <td>{{ detalle.cantidad }}</td>
+                                        <td>{{ detalle.herramienta.stock_disponible }} {{ detalle.activo_fijo.stock_disponible }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No hay herramientas en esta solicitud</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if solicitud.observaciones %}
+                        <div class="alert alert-secondary">
+                            <strong><i class="fas fa-comment-dots"></i> Observaciones:</strong> {{ solicitud.observaciones }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'solicitudes' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a solicitudes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

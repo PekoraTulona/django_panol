@@ -1,0 +1,25 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ titulo }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary">Guardar</button ```html
+    </form>
+</div>
+{% endblock %}

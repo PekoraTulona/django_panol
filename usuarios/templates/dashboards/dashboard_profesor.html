@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Profesor</title>
+    <link rel="icon" href="{% static "images/icono.png" %}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f4f6f9;
+            padding-top: 56px; /* Ajuste para el navbar fijo */
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px; /* Ajustado para que comience después del navbar */
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 20px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #bf0000; /* Cambiado a rojo */
+            color: white; /* Cambiar el color del texto a blanco */
+            width: 250px; /* Ancho fijo */
+        }
+        .sidebar .nav-link {
+            color: white; /* Asegura que los enlaces también sean blancos */
+        }
+        .sidebar .nav-link:hover {
+            color: #ffcccc; /* Opción para cambiar el color al pasar el mouse */
+        }
+        .content-wrapper {
+            margin-left: 250px; /* Mismo ancho que el sidebar */
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+            }
+            .content-wrapper {
+                margin-left: 0;
+            }
+        }
+    </style>
+    
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+        <div class="container-fluid">
+            <button class="btn btn-outline-secondary me-3 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/Logotipo_Inacap.png' %}" alt="Logo INACAP" height="80">
+            </a>
+            <span class="navbar-brand d-flex flex-column align-items-center text-center mx-auto" style='width: 1200px; font-size:30px; height: 20px; '>Panel de Profesor</span>
+            
+            <div class="ms-auto d-flex align-items-center">
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                        <img src="{{ user.avatar.url }}" class="rounded-circle me-2" width="40" height="40" alt="Avatar">
+                        <span class="d-none d-md-block">
+                            {{ user.first_name }}<br>
+                            <small class="text-muted">{{ user.email }}</small>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'perfil_profesor' %}">
+                                <i class="fas fa-user"></i> Mi Perfil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-danger">Iniciar Sesión</a>
+                {% endif %}
+            </div>
+    </nav>
+    <br>
+    <br>
+    <!-- Sidebar para pantallas grandes -->
+    <div class="col-md-2 col-lg-2 d-md-block sidebar">
+        <div class="position-sticky">
+            <ul class="nav flex-column">
+                {% block sidebar %}
+                <br><br><br>
+     
+                    <!-- En la sección de sidebar -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'estadisticas_profesor' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'crear_solicitud' %}">
+                            <i class="fas fa-clock"></i> Nueva Solicitud
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_solicitudes' %}">
+                            <i class="fas fa-list"></i> Mis Solicitudes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reportar_herramienta' %}">
+                            <i class="fas fa-tools"></i> Reportar Herramienta
+                        </a>
+                    </li>
+                {% endblock %}
+            </ul>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+        <br>
+    <!-- Offcanvas Sidebar para móviles -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menú</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+            <ul class="nav flex-column">
+                {% block mobile_sidebar %}
+                <br>
+                <br>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'estadisticas_profesor' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'crear_solicitud' %}">
+                        <i class="fas fa-plus-circle"></i> Nueva Solicitud
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'lista_solicitudes' %}">
+                        <i class="fas fa-list"></i> Mis Solicitudes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'reportar_herramienta' %}">
+                        <i class="fas fa-tools"></i> Reportar Herramienta
+                    </a>
+                </li>
+                {% endblock %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="content-wrapper">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if messages %}
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        {% for message in messages %}
+        <div class="toast align-items-center text-bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.querySelector('.content');
+            const navbar = document.querySelector('.navbar');
+
+            if (sidebar.style.width === '250px' || sidebar.style.width === '') {
+                sidebar.style.width = '0';
+                content.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '250px';
+                content.style.marginLeft = '250px';
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(function (toastElement) {
+                var toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            });
+        });
+    </script>
+</body>
+</html>

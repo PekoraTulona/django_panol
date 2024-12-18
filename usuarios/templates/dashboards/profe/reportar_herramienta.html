@@ -1,0 +1,76 @@
+{% extends 'dashboards/dashboard_profesor.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Reportar Herramienta</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="herramienta" class="form-label">Seleccionar Herramienta</label>
+                    <select name="herramienta_id" id="herramienta" class="form-select" required>
+                        <option value="">Seleccionar Herramienta</option>
+                        {% for herramienta in herramientas %}
+                        <option value="{{ herramienta.id }}">
+                            {{ herramienta.nombre }} (Stock: {{ herramienta.stock_disponible }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor, selecciona una herramienta.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo_reporte" class="form-label">Tipo de Reporte</label>
+                    <select name="tipo_reporte" id="tipo_reporte" class="form-select" required>
+                        <option value="">Tipo de Reporte</option>
+                        <option value="consumida">Herramienta Consumida</option>
+                        <option value="rota">Herramienta Rota</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor, selecciona un tipo de reporte.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cantidad" class="form-label">Cantidad</label>
+                    <input type="number" name="cantidad" id="cantidad" class="form-control" min="1" value="1" required>
+                    <div class="invalid-feedback">
+                        Ingresa una cantidad válida.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="observaciones" class="form-label">Observaciones</label>
+                    <textarea name="observaciones" id="observaciones" class="form-control" placeholder="Escribe tus observaciones aquí"></textarea>
+                </div>
+                <input type="file" name="imagen" accept="image/*" capture="camera">
+
+                <button type="submit" class="btn btn-success w-100">Reportar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Validación de formulario con Bootstrap
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

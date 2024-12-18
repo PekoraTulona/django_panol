@@ -1,0 +1,48 @@
+{% extends 'dashboards/dashboard_admin.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Administrar Herramientas</h2>
+    
+    <form method="get" class="mb-4">
+        {{ filtro_form|crispy }}
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a href="{% url 'administrar_herramientas_admin' %}" class="btn btn-secondary">Limpiar Filtros</a>
+    </form>
+
+    <a href="{% url 'agregar_herramienta_admin' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-plus"></i> Agregar Herramienta
+    </a>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Stock Total</th>
+                <th>Stock Disponible</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for herramienta in herramientas %}
+            <tr>
+                <td>{{ herramienta.nombre }}</td>
+                <td>{{ herramienta.categoria }}</td>
+                <td>{{ herramienta.stock_total }}</td>
+                <td>{{ herramienta.stock_disponible }}</td>
+                <td>
+                    <a href="{% url 'editar_herramienta_admin' herramienta.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'eliminar_herramienta_admin' herramienta.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No se encontraron herramientas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

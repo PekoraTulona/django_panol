@@ -1,0 +1,86 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Procesar Solicitud #{{ solicitud.id }}</h2>
+            
+            <div class="card">
+                <div class="card-header bg-{{ solicitud.get_estado_color }}">
+                    <h4 class="text-white">Estado Actual: {{ solicitud.get_estado_display }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Detalles de la Solicitud</h5>
+                            <p><strong>Nombre:</strong> {{ solicitud.usuario.get_full_name }}</p>
+                            <p><strong>Asignatura:</strong> {{ solicitud.asignatura.nombre }}</p>
+                            <p><strong>Fecha de Solicitud:</strong> {{ solicitud.created_at }}</p>
+                            <p><strong>Fecha de Retiro Solicitada:</strong> {{ solicitud.fecha_retiro_solicitada|default:"No especificada" }}</p>
+                            <p><strong>Fecha de Devolución Solicitada:</strong> {{ solicitud.fecha_devolucion_solicitada|default:"No especificada" }}</p>
+                            <p><strong>Nombre del Alumno</strong> {{ solicitud.alumno.nombres|default:"No especificada" }}{{ solicitud.alumno.apellidos|default:"No especificada" }} <br> <strong>Correo:</strong> {{ solicitud.alumno.correo|default:"No especificada" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Herramientas Solicitadas</h5>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Herramienta y activo</th>
+                                        <th>Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for detalle in solicitud.detalles.all %}
+                                        <tr>
+                                            <td>{{ detalle.herramienta.nombre }} {{ detalle.activo_fijo.nombre }}</td>
+                                            <td>{{ detalle.cantidad }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="observaciones" name="observaciones" rows="3">{{ solicitud.observaciones|default:"" }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="accion" value="aprobar" class="btn btn-success">
+                                <i class="fas fa-check"></i> Aprobar
+                            </button>
+                            <button type="submit" name="accion" value="rechazar" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Rechazar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const emailInput = document.getElementById('email_destinatario');
+        
+        form.addEventListener('submit', function(event) {
+            const action = event.submitter.value;
+            
+            if (action === 'aprobar' && emailInput.value.trim() === '') {
+                if (!confirm('No ha ingresado un email para notificación. ¿Desea continuar sin enviar correo?')) {
+                    event.preventDefault();
+                }
+            }
+        });
+    });
+    </script>
+{% endblock %}

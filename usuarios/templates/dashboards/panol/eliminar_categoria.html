@@ -1,0 +1,13 @@
+{% extends 'dashboards/dashboard_panolero.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Eliminar Categoría</h2>
+    <p>¿Estás seguro de que deseas eliminar la categoría "{{ categoria.nombre }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'administrar_categorias' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

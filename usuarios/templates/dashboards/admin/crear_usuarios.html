@@ -1,0 +1,35 @@
+{% extends 'dashboards/dashboard_admin.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <h2>Crear Usuario</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">Crear</button>
+    </form>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userTypeField = document.querySelector('select[name="user_type"]');
+        const asignaturasField = document.querySelector('div[id$="asignaturas"]');
+
+ function toggleAsignaturas() {
+            if (userTypeField.value === 'profesor') {
+                asignaturasField.style.display = 'block';
+            } else {
+                asignaturasField.style.display = 'none';
+            }
+        }
+
+        // Inicializar la visibilidad
+        toggleAsignaturas();
+
+        // Agregar evento para cambiar la visibilidad al seleccionar el tipo de usuario
+        userTypeField.addEventListener('change', toggleAsignaturas);
+    });
+</script>
+{% endblock %}
