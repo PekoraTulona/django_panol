@@ -479,8 +479,7 @@ def procesar_solicitud(request, solicitud_id):
                     if detalle.activo_fijo:
                         activo_fijo = detalle.activo_fijo
                         activo_fijo.devolver_al_stock(detalle.cantidad)  # Asegúrate de que este método exista en el modelo ActivoFijo
-
-            messages.warning(request, f'La solicitud #{solicitud.id} ha sido rechazada y las herramientas y activos fijos devueltos al stock.')
+                        messages.warning(request, f'La solicitud #{solicitud.id} ha sido rechazada y las herramientas y activos fijos devueltos al stock.')
             
             elif accion == 'en_proceso':
                 solicitud.estado = 'en_proceso'
