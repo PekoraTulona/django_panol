@@ -124,15 +124,3 @@
 </style>
 
 {% endblock %}
-
-{% block scripts %}
-<script>
-    $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "language": {
-                "url": "{% static 'vendor/datatables/es-ES.json' %}"
-            }
-        });
-    });
-</script>
-{% endblock %}
