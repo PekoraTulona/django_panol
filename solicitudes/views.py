@@ -473,7 +473,7 @@ profesores_solicitudes = solicitudes.values(
     'usuario__last_name'
 ).annotate(
     total_solicitudes=Count('id'),
-
+    asignaturas=get_grouped_concat(solicitudes, 'asignatura__nombre')
 ).order_by('-total_solicitudes')
 
 @login_required
@@ -743,14 +743,18 @@ def cancelar_solicitud(request, solicitud_id):
         
         # Devolver las herramientas al stock
         for detalle in solicitud.detalles.all():
-            herramienta = detalle.herramienta
-            herramienta.devolver_al_stock(detalle.cantidad)
+            if detalle.herramienta:
+                herramienta = detalle.herramienta
+                herramienta.devolver_al_stock(detalle.cantidad)
+            elif detalle.activo_fijo:
+                activo_fijo = detalle.activo_fijo
+                activo_fijo.devolver_al_stock(detalle.cantidad)  # Asegúrate de que este método exista en el modelo ActivoFijo
         
         # Cambiar el estado de la solicitud
         solicitud.estado = 'cancelada'
         solicitud.save()
         
-        messages.success(request, "Solicitud cancelada y herramientas devueltas al stock.")
+        messages.success(request, "Solicitud cancelada y herramientas y activos fijos devueltos al stock.")
         return redirect('lista_solicitudes')
     
     except Solicitud.DoesNotExist:
