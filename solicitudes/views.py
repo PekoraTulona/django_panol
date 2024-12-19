@@ -1214,7 +1214,7 @@ def gestionar_salas(request):
                 # Cambiar estado de la sala
                 sala.estado = 'ocupada'
                 sala.hora_inicio = timezone.now()
-                sala.hora_fin_prevista = timezone.now() + timezone.timedelta
+                sala.hora_fin_prevista = timezone.now() + timezone.timedelta()
                 sala.save()
             
             # Crear registros de uso para cada alumno
