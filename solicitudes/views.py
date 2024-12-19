@@ -1208,7 +1208,6 @@ def gestionar_salas(request):
         if form_ocupar.is_valid():
             sala = form_ocupar.cleaned_data['sala']
             alumnos = form_ocupar.cleaned_data['alumnos']
-            duracion = form_ocupar.cleaned_data['duracion']
             
             # Verificar disponibilidad de la sala
             if sala.estado == 'libre':
